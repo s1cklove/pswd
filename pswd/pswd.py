@@ -5,17 +5,39 @@ import json
 import os
 import click
 import pyperclip
+import yaml
 
-if not os.path.exists("assets"):
-    os.mkdir("assets")
+def init_assets():
 
-DATA_FILE = os.path.join("assets", "storage.json")
-KEY_FILE = os.path.join("assets", "private_key.pem")
+    to_yaml = {
+        "data": os.path.join("assets", "storage.json"),
+        "key": os.path.join("assets", "private_key.pem")
+    }
 
-def reset_data_file(new_data_file: str):
+    if not os.path.exists("assets"):
+        os.mkdir("assets")
+    if not os.path.exists("assets/files.yaml"):
+        with open("assets/files.yaml", "w") as files:
+            yaml.dump(to_yaml, files)
 
-    global DATA_FILE
-    DATA_FILE = new_data_file
+
+init_assets()
+
+
+def get_file(filetype):
+    if filetype not in ["data", "key"]:
+        return
+    with open("files.yaml", "r") as f:
+        return yaml.safe_load(f)[filetype]
+
+
+def set_file(filetype, filename):
+    if filetype not in ["data", "key"]:
+        return
+    with open("files.yaml", "r+") as f:
+        files = yaml.safe_load(f)
+        files[filetype] = filename
+        yaml.dump(files, f)
 
 
 def make_key():
@@ -24,8 +46,8 @@ def make_key():
         key_size=2048,
         backend=default_backend()
     )
-    with open(KEY_FILE, 'wb') as key_file:
-        key_file.write(private_key.private_bytes(
+    with open(get_file("key"), 'wb') as get_file("key"):
+        get_file("key").write(private_key.private_bytes(
             encoding=serialization.Encoding.PEM,
             format=serialization.PrivateFormat.TraditionalOpenSSL,
             encryption_algorithm=serialization.NoEncryption()
@@ -34,10 +56,10 @@ def make_key():
 
 
 def load_key():
-    if os.path.exists(KEY_FILE):
-        with open(KEY_FILE, 'rb') as key_file:
+    if os.path.exists(get_file("key")):
+        with open(get_file("key"), 'rb') as get_file("key"):
             private_key = serialization.load_pem_private_key(
-                key_file.read(),
+                get_file("key").read(),
                 password=None,
                 backend=default_backend()
             )
@@ -47,13 +69,13 @@ def load_key():
 
 
 def save_passwords(passwords):
-    with open(DATA_FILE, 'w') as f:
+    with open(get_file("data"), 'w') as f:
         json.dump(passwords, f)
 
 
 def load_passwords():
-    if os.path.exists(DATA_FILE):
-        with open(DATA_FILE, 'r') as f:
+    if os.path.exists(get_file("data")):
+        with open(get_file("data"), 'r') as f:
             return json.load(f)
     return {}
 
@@ -191,7 +213,7 @@ def delete(service):
 @cli.command()
 def get_storage():
     """Get storage file path."""
-    click.echo(DATA_FILE)
+    click.echo(get_file("data"))
 
 @cli.command()
 @click.argument('new_path')
@@ -207,7 +229,7 @@ def reset_storage(new_path: str):
 
     new_path = os.path.abspath(new_path)
 
-    os.system(f"move {DATA_FILE} {new_path}")
-
-    reset_data_file(new_path)
-    click.echo(f"Moved storage file {DATA_FILE} to {new_path}")
+    os.system(f"move {get_file("data")} {new_path}")
+    
+    set_file("data", new_path)
+    click.echo(f"Moved storage file {get_file("data")} to {new_path}")
