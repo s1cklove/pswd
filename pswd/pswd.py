@@ -18,6 +18,21 @@ def reset_data_file(new_data_file: str):
     DATA_FILE = new_data_file
 
 
+def make_key():
+    private_key = rsa.generate_private_key(
+        public_exponent=65537,
+        key_size=2048,
+        backend=default_backend()
+    )
+    with open(KEY_FILE, 'wb') as key_file:
+        key_file.write(private_key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.TraditionalOpenSSL,
+            encryption_algorithm=serialization.NoEncryption()
+        ))
+    return private_key
+
+
 def load_key():
     if os.path.exists(KEY_FILE):
         with open(KEY_FILE, 'rb') as key_file:
@@ -29,18 +44,7 @@ def load_key():
         return private_key
     else:
         print("RSA key not found. Making a new one...")
-        private_key = rsa.generate_private_key(
-            public_exponent=65537,
-            key_size=2048,
-            backend=default_backend()
-        )
-        with open(KEY_FILE, 'wb') as key_file:
-            key_file.write(private_key.private_bytes(
-                encoding=serialization.Encoding.PEM,
-                format=serialization.PrivateFormat.TraditionalOpenSSL,
-                encryption_algorithm=serialization.NoEncryption()
-            ))
-        return private_key
+        return make_key()
 
 
 def save_passwords(passwords):
