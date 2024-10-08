@@ -46,8 +46,8 @@ def make_key():
         key_size=2048,
         backend=default_backend()
     )
-    with open(get_file("key"), 'wb') as get_file("key"):
-        get_file("key").write(private_key.private_bytes(
+    with open(get_file("key"), 'wb') as f:
+        f.write(private_key.private_bytes(
             encoding=serialization.Encoding.PEM,
             format=serialization.PrivateFormat.TraditionalOpenSSL,
             encryption_algorithm=serialization.NoEncryption()
@@ -57,9 +57,9 @@ def make_key():
 
 def load_key():
     if os.path.exists(get_file("key")):
-        with open(get_file("key"), 'rb') as get_file("key"):
+        with open(get_file("key"), 'rb') as f:
             private_key = serialization.load_pem_private_key(
-                get_file("key").read(),
+                f.read(),
                 password=None,
                 backend=default_backend()
             )
