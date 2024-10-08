@@ -42,9 +42,8 @@ def load_key():
                 backend=default_backend()
             )
         return private_key
-    else:
-        print("RSA key not found. Making a new one...")
-        return make_key()
+    print("RSA key not found. Making a new one...")
+    return make_key()
 
 
 def save_passwords(passwords):
