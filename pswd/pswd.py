@@ -78,6 +78,19 @@ def decrypt_password(private_key, encrypted_password):
     )
     return decrypted_password.decode()
 
+
+def get_password(service):
+    private_key = load_key()
+    passwords = load_passwords()
+
+    encrypted_password_hex = passwords.get(service.lower())
+    if not encrypted_password_hex:
+        click.echo(f"No password found for a service.")
+        return
+
+    encrypted_password = bytes.fromhex(encrypted_password_hex)
+    return decrypt_password(private_key, encrypted_password)
+
 # CLI
 
 @click.group()
@@ -109,34 +122,14 @@ def new(service, password):
 @click.argument('service')
 def get(service):
     """Get a password for a service."""
-    private_key = load_key()
-    passwords = load_passwords()
-
-    encrypted_password_hex = passwords.get(service.lower())
-    if not encrypted_password_hex:
-        click.echo(f"No password found for a service.")
-        return
-
-    encrypted_password = bytes.fromhex(encrypted_password_hex)
-    decrypted_password = decrypt_password(private_key, encrypted_password)
-    click.echo(decrypted_password)
+    click.echo(get_password(service))
 
 
 @cli.command()
 @click.argument('service')
 def copy(service):
     """Copy a password to the clipboard."""
-    private_key = load_key()
-    passwords = load_passwords()
-
-    encrypted_password_hex = passwords.get(service.lower())
-    if not encrypted_password_hex:
-        click.echo(f"No password found for a service.")
-        return
-
-    encrypted_password = bytes.fromhex(encrypted_password_hex)
-    decrypted_password = decrypt_password(private_key, encrypted_password)
-    pyperclip.copy(decrypted_password)
+    pyperclip.copy(get_password(service))
     click.echo(f"Copied to clipboard.")
 
 
