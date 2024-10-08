@@ -3,6 +3,8 @@ from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.hazmat.backends import default_backend
 import json
 import os
+import click
+import pyperclip
 
 if not os.path.exists("assets"):
     os.mkdir("assets")
@@ -77,11 +79,6 @@ def decrypt_password(private_key, encrypted_password):
     return decrypted_password.decode()
 
 # CLI
-
-from rsa import *
-from store import DATA_FILE, reset_data_file
-import click
-import pyperclip
 
 @click.group()
 def cli():
