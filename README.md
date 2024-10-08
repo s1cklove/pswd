@@ -31,7 +31,7 @@ $ pswd delete "instagram"
 
 ## Install
 
-1. Download the latest version from assets 
+1. Download the latest version from [releases](https://github.com/s1cklove/pswd/releases)
 and unpack it
 2. Based on OS, pip required:
 - **Windows**: run command line (or PowerShell)
